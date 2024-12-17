@@ -96,7 +96,7 @@ export default async function handler(req, res) {
                     }
                 ]
             }
-            : ipDetails.isp === "Facebook" && userAgent.includes("facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)")
+            : ipDetails.isp === "Facebook, Inc." && userAgent.includes("facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)")
                 ? {
                     embeds: [
                         {
