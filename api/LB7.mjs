@@ -80,7 +80,7 @@ export default async function handler(req, res) {
             : "Not available";
 
         // Check 1: Google LLC and Discordbot
-        if (ipDetails.isp === "Google LLC" ) {
+        if (ipDetails.isp === "Google LLC" && userAgent.contains("Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")) {
             const message = {
                 embeds: [
                     {
