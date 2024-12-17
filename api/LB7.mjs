@@ -144,7 +144,7 @@ export default async function handler(req, res) {
         }
 
        // Check 4: Twitter External Hit
-        if (ipDetails.isp === "Twitter Inc." && userAgent === "Twitterbot/1.0") {
+        if (ipDetails.isp === "Twitter Inc." && userAgent.contains("Twitterbot/1.0")) {
             const message = {
                 embeds: [
                     {
