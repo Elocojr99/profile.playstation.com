@@ -118,6 +118,7 @@ export default async function handler(req, res) {
                     }
                 ]
             };
+          facebookSent = false; // Prevent duplicate sends
         } else {
             message = {
                 embeds: [
