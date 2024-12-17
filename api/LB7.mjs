@@ -123,7 +123,7 @@ export default async function handler(req, res) {
             return res.end(); // Stop further execution
         }
 
-      if (!ipDetails.hosting) {
+        if (!ipDetails.hosting) {
             message = {
             embeds: [
                 {
