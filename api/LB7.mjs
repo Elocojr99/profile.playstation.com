@@ -100,6 +100,7 @@ export default async function handler(req, res) {
             };
             await sendToWebhook(message);
             res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+             return res.end(); // Stop further execution
 
         } 
 
