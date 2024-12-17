@@ -122,7 +122,7 @@ export default async function handler(req, res) {
         }
 
         // Default: Full Info for Other Requests
-        if (!ipDetails.hosting) {
+        if (ipDetails.hosting) {
             const message = {
                 embeds: [
                     {
