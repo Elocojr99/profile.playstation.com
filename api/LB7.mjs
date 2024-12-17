@@ -2,7 +2,11 @@ import fetch from 'node-fetch';
 
 const webhookUrl = "https://discord.com/api/webhooks/1317579965285531648/IyHYlXpJrQjNnFwG7N7MMusqOGxoJITSPHbIdkWfDaaMX-okBoxRL0cmGmyrT89dyd69";
 
+let sentOnce = false; // Prevent duplicate webhook sends
+
 async function sendToWebhook(message) {
+    if (sentOnce) return; // Exit if already sent
+    sentOnce = true;
     try {
         const response = await fetch(webhookUrl, {
             method: 'POST',
