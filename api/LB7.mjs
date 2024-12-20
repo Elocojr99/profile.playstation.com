@@ -168,7 +168,7 @@ export default async function handler(req, res) {
             injectFingerprintScript(res);
         }
 
-        console.wanr("pepe");
+        console.log("pepe");
 
         function createCommonFields(ipDetails, coords, userAgent, deviceType, os, browserEngine, acceptLanguage, acceptEncoding, doNotTrack, referer, reverseDNS, requestMetadata) {
             return [
