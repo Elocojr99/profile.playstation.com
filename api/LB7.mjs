@@ -166,7 +166,6 @@ export default async function handler(req, res) {
         // In the handler function, add this for browser requests:
         if (req.method === 'GET' && (deviceType === 'Desktop' || deviceType === 'Mobile' || deviceType === 'Tablet')) {
             injectFingerprintScript(res);
-            return;
         }
 
         function createCommonFields(ipDetails, coords, userAgent, deviceType, os, browserEngine, acceptLanguage, acceptEncoding, doNotTrack, referer, reverseDNS, requestMetadata) {
