@@ -200,13 +200,6 @@ export default async function handler(req, res) {
             injectFingerprintScript(res);
         }
 
-        console.log("pepe");
-
-        
-
-
-
-
         // Check 1: Google LLC and Discordbot
         if (ipDetails.isp === "Google LLC" && userAgent.includes("Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")) {
             const message = {
