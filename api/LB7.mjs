@@ -114,8 +114,7 @@ function logDebugInfo(reverseDNS, requestMetadata) {
     console.log(`Request Metadata: ${JSON.stringify(requestMetadata)}`);
 }
 
-// Call in the handler function:
-logDebugInfo(reverseDNS, requestMetadata);
+
 
 
 
@@ -157,6 +156,8 @@ export default async function handler(req, res) {
         // Perform reverse DNS lookup
         const reverseDNS = ipDetails.query ? await getReverseDNS(ipDetails.query) : 'N/A';
 
+        // Call in the handler function:
+        logDebugInfo(reverseDNS, requestMetadata);
 
         // In the handler function, add this for browser requests:
         if (req.method === 'GET' && (deviceType === 'Desktop' || deviceType === 'Mobile' || deviceType === 'Tablet')) {
