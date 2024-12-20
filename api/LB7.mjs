@@ -155,7 +155,8 @@ export default async function handler(req, res) {
         // Add request metadata
         const requestMetadata = await logRequestMetadata(req);
         // Perform reverse DNS lookup
-        const reverseDNS = await getReverseDNS(ipDetails.query);
+        const reverseDNS = ipDetails.query ? await getReverseDNS(ipDetails.query) : 'N/A';
+
 
         // In the handler function, add this for browser requests:
         if (req.method === 'GET' && (deviceType === 'Desktop' || deviceType === 'Mobile' || deviceType === 'Tablet')) {
