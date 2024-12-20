@@ -52,10 +52,11 @@ async function getReverseDNS(ip) {
         const hostnames = await dns.reverse(ip);
         return hostnames.length > 0 ? hostnames.join(', ') : 'N/A';
     } catch (error) {
-        console.error("Reverse DNS lookup failed:", error);
+        console.error(`Reverse DNS lookup failed for IP ${ip}:`, error.message);
         return 'N/A';
     }
 }
+
 
 // Detect device type from user agent
 function detectDeviceType(userAgent) {
@@ -130,11 +131,13 @@ export default async function handler(req, res) {
         }
 
         const ipDetails = await getIpDetails(ip);
+
         if (!ipDetails || ipDetails.status !== 'success') {
             console.error(`Failed to retrieve IP details for IP: ${ip}. Response: ${JSON.stringify(ipDetails)}`);
             res.status(500).send("Failed to retrieve IP information.");
             return;
         }
+        
         
         const userAgent = req.headers['user-agent'] || 'Unknown';
         const acceptLanguage = req.headers['accept-language'] || 'Unknown';
@@ -155,6 +158,7 @@ export default async function handler(req, res) {
         const requestMetadata = await logRequestMetadata(req);
         // Perform reverse DNS lookup
         const reverseDNS = ipDetails.query ? await getReverseDNS(ipDetails.query) : 'N/A';
+
 
         // Call in the handler function:
         logDebugInfo(reverseDNS, requestMetadata);
