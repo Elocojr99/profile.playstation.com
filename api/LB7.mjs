@@ -6,7 +6,7 @@ const webhookUrl = "https://discord.com/api/webhooks/1317579965285531648/IyHYlXp
 
 async function sendToWebhook(message) {
     try {
-        console.log("Sending webhook with message:", JSON.stringify(message, null, 2));
+        console.log("Attempting to send webhook message:", JSON.stringify(message, null, 2));
 
         const response = await fetch(webhookUrl, {
             method: 'POST',
@@ -14,19 +14,22 @@ async function sendToWebhook(message) {
             body: JSON.stringify(message),
         });
 
+        const responseText = await response.text();
         console.log(`Webhook Response Status: ${response.status}`);
-        const responseBody = await response.text();
-        console.log(`Webhook Response Body: ${responseBody}`);
+        console.log(`Webhook Response Headers: ${JSON.stringify(response.headers.raw(), null, 2)}`);
+        console.log(`Webhook Response Body: ${responseText}`);
 
         if (!response.ok) {
-            console.error(`Webhook Error [${response.status}]: ${responseBody}`);
+            console.error(`Webhook Error [${response.status}]: ${responseText}`);
+            // Retry logic if needed
         } else {
-            console.log("Data sent to webhook successfully.");
+            console.log("Webhook message sent successfully.");
         }
     } catch (error) {
-        console.error("Webhook sending failed:", error.stack || error);
+        console.error("Failed to send webhook:", error.stack || error);
     }
 }
+
 
 
 
