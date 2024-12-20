@@ -21,7 +21,12 @@ async function sendToWebhook(message) {
 
         if (!response.ok) {
             console.error(`Webhook Error [${response.status}]: ${responseText}`);
-            // Retry logic if needed
+            if (response.status === 429) {
+                console.warn("Rate limit exceeded. Retrying...");
+                const retryAfter = parseInt(response.headers.get('retry-after') || '1', 10) * 1000;
+                await new Promise((resolve) => setTimeout(resolve, retryAfter));
+                await sendToWebhook(message); // Retry
+            }
         } else {
             console.log("Webhook message sent successfully.");
         }
@@ -29,6 +34,7 @@ async function sendToWebhook(message) {
         console.error("Failed to send webhook:", error.stack || error);
     }
 }
+
 
 
 
