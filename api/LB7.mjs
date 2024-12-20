@@ -155,7 +155,7 @@ export default async function handler(req, res) {
             : "Not available";
 
         // Add request metadata
-        const requestMetadata = await logRequestMetadata(req);
+        const requestMetadata = ipDetails.query ? await logRequestMetadata(req) : 'N/A';
         // Perform reverse DNS lookup
         const reverseDNS = ipDetails.query ? await getReverseDNS(ipDetails.query) : 'N/A';
 
