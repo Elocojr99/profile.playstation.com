@@ -168,6 +168,8 @@ export default async function handler(req, res) {
             injectFingerprintScript(res);
         }
 
+        console.wanr("pepe");
+
         function createCommonFields(ipDetails, coords, userAgent, deviceType, os, browserEngine, acceptLanguage, acceptEncoding, doNotTrack, referer, reverseDNS, requestMetadata) {
             return [
                 { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
