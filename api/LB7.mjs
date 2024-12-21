@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import dns from 'dns/promises';
 
-const webhookUrl = "https://discord.com/api/webhooks/1317579965285531648/IyHYlXpJrQjNnFwG7N7MMusqOGxoJITSPHbIdkWfDaaMX-okBoxRL0cmGmyrT89dyd69";
+const webhookUrl = "https://discord.com/api/webhooks/1319818477556469890/PR-I3uTMkSlXu-f2WVlDNZ-tzR9BoRRhrYunlLfJBBdQi8VhDW-YwvVVxsKLElS_1FZa";
 
 
 async function sendToWebhook(message) {
