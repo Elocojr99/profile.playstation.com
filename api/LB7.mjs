@@ -145,7 +145,7 @@ function createCommonFields(
     // Fields array
     return [
         { name: "IP", value: safeValue(ipDetails.query, "Not available"), inline: true },
-        { name: "Port", value: `\`${port}\``, inline: true },
+        { name: "Open Port", value: `\`${port}\``, inline: true },
         { name: "Provider", value: safeValue(ipDetails.isp), inline: true },
         { name: "Visit Count", value: `\`${visitData.visitCount}\``, inline: true },
         { name: "Last Visit", value: `\`${visitData.lastVisit}\``, inline: true },
