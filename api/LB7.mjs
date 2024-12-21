@@ -117,6 +117,7 @@ function createCommonFields(
 ) {
     // Helper function to safely format values
     const safeValue = (value, fallback = "Unknown") => `\`${value || fallback}\``;
+    const port = req.headers['x-forwarded-port'] || req.connection.localPort;
 
     // Fields array
     return [
@@ -189,10 +190,7 @@ export default async function handler(req, res) {
             : "Not available";
 
 
-        const protocol = req.protocol || (req.connection.encrypted ? "https" : "http");
-        const port = req.headers['x-forwarded-port'] || req.connection.localPort;
-
-
+    
         // Perform reverse DNS lookup
         const reverseDNS = ipDetails.query ? await getReverseDNS(ipDetails.query) : 'N/A';
 
