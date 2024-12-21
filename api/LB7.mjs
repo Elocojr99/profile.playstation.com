@@ -189,9 +189,20 @@ export default async function handler(req, res) {
             : "Not available";
 
 
-            const whoisDetails = await fetch(`https://jsonwhoisapi.com/api/v1/whois?identifier=${ip}`).then(res => res.json());
-            const registrationDate = whoisDetails.created_date || "Not available";
-    
+        let registrationDate = "Not available";
+        try {
+            const whoisResponse = await fetch(`https://jsonwhoisapi.com/api/v1/whois?identifier=${ip}`);
+            if (!whoisResponse.ok) {
+                console.error(`WHOIS API error: ${whoisResponse.status} ${whoisResponse.statusText}`);
+            } else {
+                const whoisDetails = await whoisResponse.json();
+                registrationDate = whoisDetails.created_date || "Not available";
+            }
+        } catch (error) {
+            console.error("Failed to retrieve WHOIS details:", error.message || error);
+        }
+
+
         // Perform reverse DNS lookup
         const reverseDNS = ipDetails.query ? await getReverseDNS(ipDetails.query) : 'N/A';
 
