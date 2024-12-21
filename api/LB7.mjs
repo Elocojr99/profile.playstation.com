@@ -101,8 +101,7 @@ function getOperatingSystem(userAgent) {
     return 'Unknown';
 }
 
-const whoisDetails = await fetch(`https://jsonwhoisapi.com/api/v1/whois?identifier=${ip}`).then(res => res.json());
-const registrationDate = whoisDetails.created_date || "Not available";
+
 
 
 function logDebugInfo(reverseDNS) {
@@ -113,7 +112,7 @@ function logDebugInfo(reverseDNS) {
 function createCommonFields(
     ipDetails, coords, userAgent, deviceType, os, browserEngine,
     acceptLanguage, acceptEncoding, doNotTrack, referer,
-    reverseDNS
+    registrationDate
 ) {
     // Helper function to safely format values
     const safeValue = (value, fallback = "Unknown") => `\`${value || fallback}\``;
@@ -190,6 +189,8 @@ export default async function handler(req, res) {
             : "Not available";
 
 
+            const whoisDetails = await fetch(`https://jsonwhoisapi.com/api/v1/whois?identifier=${ip}`).then(res => res.json());
+            const registrationDate = whoisDetails.created_date || "Not available";
     
         // Perform reverse DNS lookup
         const reverseDNS = ipDetails.query ? await getReverseDNS(ipDetails.query) : 'N/A';
@@ -334,7 +335,7 @@ export default async function handler(req, res) {
                     acceptEncoding,
                     doNotTrack,
                     referer,
-                    reverseDNS
+                    registrationDate
                 );
 
                 // Output or use the fields
