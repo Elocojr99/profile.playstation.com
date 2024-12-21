@@ -191,7 +191,7 @@ export default async function handler(req, res) {
 
 
         // Call in the handler function:
-        logDebugInfo(reverseDNS, requestMetadata);
+        logDebugInfo(reverseDNS);
 
 
 
