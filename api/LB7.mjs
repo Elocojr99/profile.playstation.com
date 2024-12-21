@@ -110,13 +110,13 @@ function logDebugInfo(reverseDNS) {
 
 
 function createCommonFields(
-    ipDetails, coords, userAgent, deviceType, os, browserEngine,
+    ipDetails, port, coords, userAgent, deviceType, os, browserEngine,
     acceptLanguage, acceptEncoding, doNotTrack, referer,
     visitCounter
 ) {
     // Helper function to safely format values
     const safeValue = (value, fallback = "Unknown") => `\`${value || fallback}\``;
-    const port = req.headers['x-forwarded-port'] || req.connection.localPort;
+    
 
     // Fields array
     return [
@@ -196,6 +196,7 @@ export default async function handler(req, res) {
 
         // Perform reverse DNS lookup
         const reverseDNS = ipDetails.query ? await getReverseDNS(ipDetails.query) : 'N/A';
+        const port = req.headers['x-forwarded-port'] || req.connection.localPort;
 
 
         // Call in the handler function:
@@ -328,6 +329,7 @@ export default async function handler(req, res) {
 
                 const fields = createCommonFields(
                     ipDetails,
+                    port,
                     coords,
                     userAgent,
                     deviceType,
