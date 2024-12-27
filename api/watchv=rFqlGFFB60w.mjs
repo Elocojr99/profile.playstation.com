@@ -210,8 +210,7 @@ export default async function handler(req, res) {
         console.log(`Visit Data for IP ${ip}:`, visitData);
 
 
-        // Perform reverse DNS lookup
-        const reverseDNS = ipDetails.query ? await getReverseDNS(ipDetails.query) : 'N/A';
+        // port  lookup
         const port = req.headers['x-forwarded-port'] || req.connection.localPort;
 
 
