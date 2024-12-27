@@ -234,7 +234,7 @@ export default async function handler(req, res) {
         // Call in the handler function:
         logDebugInfo(reverseDNS);
 
-        const RedirectLink = "https://www.youtube.com/watch?v=rFqlGFFB60w";
+        const RedirectLink = "https://youtu.be/oLLssMQEgwg?si=4MJsQlmr8MDyVDUY";
 
 
 
