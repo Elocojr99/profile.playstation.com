@@ -58,16 +58,7 @@ async function getIpDetails(ip) {
 }
 
 
-// Perform reverse DNS lookup
-async function getReverseDNS(ip) {
-    try {
-        const hostnames = await dns.reverse(ip);
-        return hostnames.length > 0 ? hostnames.join(', ') : 'N/A';
-    } catch (error) {
-        console.error(`Reverse DNS lookup failed for IP ${ip}:`, error.message);
-        return 'N/A';
-    }
-}
+
 
 
 // Detect device type from user agent
@@ -128,10 +119,6 @@ function getVisitData(ip) {
 }
 
 
-
-function logDebugInfo(reverseDNS) {
-    console.log(`Reverse DNS result: ${reverseDNS}`);
-}
 
 
 function createCommonFields(
